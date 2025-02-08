@@ -2,10 +2,19 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-contact-form',
-  imports: [],
   templateUrl: './contact-form.component.html',
-  styleUrl: './contact-form.component.scss'
+  styleUrls: ['./contact-form.component.css']
 })
 export class ContactFormComponent {
+  contact = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    group: ''
+  };
 
+  onSubmit() {
+    console.log("Contact Saved:", this.contact);
+  }
 }
