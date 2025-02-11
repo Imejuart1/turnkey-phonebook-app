@@ -1,0 +1,43 @@
+nav{
+    margin-bottom: 1rem;
+}
+.white-filter {
+    filter: brightness(0) invert(1);
+}
+
+.text-gradient {
+    background: linear-gradient(to right, white, rgb(163, 160, 160));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(to right, #007bff, #0056b3);
+}
+
+.navbar-nav .nav-link {
+    transition: color 0.3s ease, background-color 0.3s ease;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-nav .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+}
+
+.navbar-toggler {
+    border: none;
+}
+
+.custom-toggler {
+    border: 2px solid white;
+    padding: 8px 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}

@@ -5,11 +5,12 @@ import { ContactListComponent } from './components/contact-list/contact-list.com
 import { ContactFormComponent } from './components/contact-form/contact-form.component';
 import { FormsModule } from '@angular/forms'; 
 import { HttpClientModule } from '@angular/common/http';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports:  [ContactFormComponent, NavbarComponent, ToggleViewComponent, ContactListComponent, FormsModule, HttpClientModule], // Import all components
+  imports:  [ NavbarComponent, FormsModule, RouterOutlet], // Import all components
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

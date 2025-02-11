@@ -6,7 +6,6 @@ import { Contact } from '../../models/contact.model';
 
 @Component({
   selector: 'app-contact-list',
-  standalone: true,
   imports: [CommonModule, ToggleViewComponent],
   templateUrl: './contact-list.component.html',
   styleUrls: ['./contact-list.component.css']
