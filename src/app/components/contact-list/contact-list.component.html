@@ -1,20 +1,19 @@
 <div class="container">
-    <app-toggle-view></app-toggle-view>
-    
-    <div [ngClass]="viewMode === 'grid' ? 'row' : ''">
-      <div *ngFor="let contact of contacts" [ngClass]="viewMode === 'grid' ? 'col-md-4' : 'col-12'">
-        <div class="card mb-3">
-          <img src="{{ contact.image }}" class="card-img-top" alt="Contact Image">
-          <div class="card-body">
-            <h5 class="card-title">{{ contact.firstName }} {{ contact.lastName }}</h5>
-            <p class="card-text">{{ contact.email }}</p>
-            <p class="card-text">{{ contact.phone }}</p>
-            <button class="btn btn-sm btn-outline-primary">View</button>
-            <button class="btn btn-sm btn-outline-warning">Edit</button>
-            <button class="btn btn-sm btn-outline-danger">Delete</button>
-          </div>
+  <app-toggle-view (viewModeChanged)="toggleView($event)"></app-toggle-view>
+
+  <div [ngClass]="viewMode === 'grid' ? 'row' : ''">
+    <div *ngFor="let contact of contacts" [ngClass]="viewMode === 'grid' ? 'col-md-4' : 'col-12'">
+      <div class="card mb-3">
+        <img [src]="contact.contactImage || 'https://via.placeholder.com/150'" class="card-img-top" alt="Contact Image">
+        <div class="card-body">
+          <h5 class="card-title">{{ contact.firstName }} {{ contact.lastName }}</h5>
+          <p class="card-text">{{ contact.email }}</p>
+          <p class="card-text">{{ contact.phoneNumber }}</p>
+          <button class="btn btn-sm btn-outline-primary">View</button>
+          <button class="btn btn-sm btn-outline-warning">Edit</button>
+          <button class="btn btn-sm btn-outline-danger">Delete</button>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
