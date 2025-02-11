@@ -1,10 +1,6 @@
 import { Component } from '@angular/core';
 import { NavbarComponent } from './components/navbar/navbar.component';
-import { ToggleViewComponent } from './components/toggle-view/toggle-view.component';
-import { ContactListComponent } from './components/contact-list/contact-list.component';
-import { ContactFormComponent } from './components/contact-form/contact-form.component';
 import { FormsModule } from '@angular/forms'; 
-import { HttpClientModule } from '@angular/common/http';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
