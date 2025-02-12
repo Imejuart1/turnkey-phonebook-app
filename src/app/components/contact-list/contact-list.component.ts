@@ -31,6 +31,13 @@ export class ContactListComponent implements OnInit {
 
   ngOnInit() {
     this.loadContacts();
+    const savedView = localStorage.getItem('contactViewMode');
+    if (savedView) {
+      this.viewMode = savedView;
+    }
+  }
+  setViewMode(mode: string) {
+    this.viewMode = mode;
   }
   isEmailValid: boolean = true;
   isPhoneValid: boolean = true;
