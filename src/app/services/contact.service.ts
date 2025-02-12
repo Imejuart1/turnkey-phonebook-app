@@ -20,4 +20,13 @@ export class ContactService {
     return this.http.get<Contact[]>(this.apiUrl)
       .pipe(map(contacts => contacts.sort((a, b) => a.firstName.localeCompare(b.firstName))));
   }
+
+  deleteContact(contactId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${contactId}`);
+  }
+  
+  updateContact(id: number, contact: Contact): Observable<Contact> {
+    return this.http.put<Contact>(`${this.apiUrl}/${id}`, contact);
+  }
+  
 }

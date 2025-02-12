@@ -15,7 +15,7 @@ export class ContactFormComponent {
   contact: Contact = new Contact();
   imagePreview: string | ArrayBuffer | null = 'assets/default-avatar.png'; // Default avatar
   imageFile: File | null = null;
-
+  isSaving: boolean = false;
   constructor(private contactService: ContactService, private http: HttpClient) {}
 
   onImageChange(event: any) {
@@ -29,6 +29,7 @@ export class ContactFormComponent {
   }
 
   uploadImageAndSaveContact() {
+    this.isSaving = true;
     if (this.imageFile) {
       const formData = new FormData();
       formData.append('file', this.imageFile);
@@ -40,6 +41,7 @@ export class ContactFormComponent {
           this.saveContact();
         }, error => {
           console.error('Image upload failed', error);
+          this.isSaving = false;
         });
     } else {
       this.saveContact();
@@ -47,11 +49,17 @@ export class ContactFormComponent {
   }
 
   saveContact() {
+    this.isSaving = true;
     this.contactService.saveContact(this.contact).subscribe(response => {
       console.log('Contact saved successfully', response);
       alert('Contact saved successfully!');
+      this.contact = new Contact(); // Reset the form data
+      this.imagePreview = 'assets/default-avatar.png'; // Reset the image preview
+      this.imageFile = null;
+      this.isSaving = false;
     }, error => {
       console.error('Error saving contact', error);
+      this.isSaving = false;
     });
   }
 

@@ -1,57 +1,72 @@
 <div class="container">
-  <app-toggle-view (viewModeChanged)="toggleView($event)" style="text-align: flexe;"></app-toggle-view>
- <!-- Search Bar -->
- <div class="row mb-3">
-  <div class="col-md-6">
-  <input 
-    type="text" 
-    class="form-control" 
-    placeholder="Search by name, email, or phone number..." 
-    [(ngModel)]="searchQuery"
-    (input)="filterContacts()"
-  />
-</div>
-<div class="col-md-2 position-relative">
-  <button 
-    class="btn btn-dark dropdown-toggle d-flex align-items-center justify-content-between w-100" 
-    type="button" 
-    (click)="toggleDropdown()"
-    [attr.aria-expanded]="isDropdownOpen"
-  >
-    <span>{{ selectedgroupType ? selectedgroupType : 'Select Group' }}</span>
-    <i class="bi" [ngClass]="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-  </button>
+  <app-toggle-view (viewModeChanged)="toggleView($event)"></app-toggle-view>
 
-  <!-- Dropdown Menu -->
-  <ul 
-    *ngIf="isDropdownOpen" 
-    class="dropdown-menu show w-100 position-absolute shadow border"
-    style="top: 100%; left: 0; z-index: 1050; background: white;"
-  >
-    <li (click)="selectGroup('')">
-      <a class="dropdown-item">All Contacts</a>
-    </li>
-    <li *ngFor="let groupType of contactgroupTypes" (click)="selectGroup(groupType)">
-      <a class="dropdown-item">{{ groupType }}</a>
-    </li>
-  </ul>
-</div>
+  <!-- Search & Bulk Delete -->
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Search by name, email, or phone number..." 
+        [(ngModel)]="searchQuery"
+        (input)="filterContacts()"
+      />
+    </div>
 
-</div>
-  <div  [ngClass]="viewMode === 'grid' ? 'row d-flex justify-content-between' : 'd-flex flex-column gap-3'">
-    <div *ngFor="let contact of filteredContacts"  [ngClass]="viewMode === 'grid' ? 'col-md-4 col-lg-3' : 'card mb-0'" 
+    <div class="col-md-2 position-relative">
+      <button 
+        class="btn btn-dark dropdown-toggle d-flex align-items-center justify-content-between w-100" 
+        type="button" 
+        (click)="toggleDropdown()"
+        [attr.aria-expanded]="isDropdownOpen"
+      >
+        <span>{{ selectedgroupType ? selectedgroupType : 'Select Group' }}</span>
+        <i class="bi" [ngClass]="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <ul 
+        *ngIf="isDropdownOpen" 
+        class="dropdown-menu show w-100 position-absolute shadow border"
+        style="top: 100%; left: 0; z-index: 1050; background: white;"
+      >
+        <li (click)="selectGroup('')">
+          <a class="dropdown-item">All Contacts</a>
+        </li>
+        <li *ngFor="let groupType of contactgroupTypes" (click)="selectGroup(groupType)">
+          <a class="dropdown-item">{{ groupType }}</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="col-md-2">
+      <button class="btn btn-danger w-100" [disabled]="!selectedContacts.length" (click)="bulkDelete()">
+        {{ selectedContacts.length ? 'Delete ' + selectedContacts.length : 'Bulk Delete' }}
+      </button>
+    </div>
+  </div>
+
+  <div [ngClass]="viewMode === 'grid' ? 'row d-flex justify-content-between' : 'd-flex flex-column gap-3'">
+    <div *ngFor="let contact of filteredContacts" 
+         [ngClass]="viewMode === 'grid' ? 'col-md-4 col-lg-3' : 'card mb-0'" 
          class="card p-2 shadow-sm border"
          [style.background]="viewMode === 'grid' ? 'linear-gradient(to bottom, grey, #ffffff)' : 'white'"
          style="border: 2px solid #ccc; border-radius: 10px; transition: all 0.3s;">
-        
+      
+      <!-- Checkbox for selection -->
+      <div class="position-absolute" 
+      [ngStyle]="{ 'top': viewMode === 'grid' ? '10px' : '30px', 'left': '15px', 'margin-right': '3rem' }">
+   <input type="checkbox" (change)="toggleSelection(contact)" [checked]="selectedContacts.includes(contact)">
+ </div>
+
       <!-- Grid View -->
       <div *ngIf="viewMode === 'grid'" class="d-flex flex-column align-items-center text-center p-2">
-        <div class="posre position-relative d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;">
+        <div class="position-relative d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;">
           <img *ngIf="contact.contactImage" 
-            [src]="contact.contactImage" 
-            class="rounded-circle border"
-            alt="Contact Image"
-            style="width: 100%; height: 100%; object-fit: cover;"
+               [src]="contact.contactImage" 
+               class="rounded-circle border"
+               alt="Contact Image"
+               style="width: 100%; height: 100%; object-fit: contain" 
           />
           <div *ngIf="!contact.contactImage" 
                class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
@@ -61,26 +76,26 @@
         </div>
         <h6 class="mt-2 text-dark fw-bold">{{ contact.firstName }} {{ contact.lastName }}</h6>
         <p class="text-dark small">{{ contact.phoneNumber }}</p>
-
+     
         <!-- Buttons -->
         <div class="d-flex gap-2">
           <button class="btn btn-sm btn-primary" (click)="openModal(contact)">View</button>
-          <button class="btn btn-sm btn-warning" (click)="editContact(contact)">Edit</button>
           <button class="btn btn-sm btn-danger" (click)="deleteContact(contact)">Delete</button>
         </div>
+        
       </div>
 
       <!-- List View -->
       <div *ngIf="viewMode === 'list'" 
            class="d-flex align-items-center p-2 shadow-sm list-item"
            style="border-radius: 10px; border: 2px solid #ccc; transition: background 0.3s, box-shadow 0.3s;">
-
-        <div class="position-relative d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+        
+        <div class="position-relative d-flex justify-content-center align-items-center" style="width: 50px; height: 50px; margin-left: 1rem;">
           <img *ngIf="contact.contactImage" 
                [src]="contact.contactImage" 
                class="rounded-circle border"
                alt="Contact Image"
-               style="width: 100%; height: 100%; object-fit: cover;" 
+               style="width: 100%; height: 100%; object-fit: contain " 
           />
           <div *ngIf="!contact.contactImage" 
                class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
@@ -97,39 +112,63 @@
         <!-- Buttons -->
         <div class="d-flex gap-2">
           <button class="btn btn-sm btn-primary" (click)="openModal(contact)">View</button>
-          <button class="btn btn-sm btn-warning" (click)="editContact(contact)">Edit</button>
           <button class="btn btn-sm btn-danger" (click)="deleteContact(contact)">Delete</button>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Modal -->
-  <div *ngIf="selectedContact" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5);">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ selectedContact.firstName }} {{ selectedContact.lastName }}</h5>
-          <button type="button" class="btn-close" (click)="closeModal()"></button>
+  
+ <!-- Modal for Viewing & Editing -->
+<div *ngIf="selectedContact" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ isEditing ? 'Edit Contact' : selectedContact.firstName + ' ' + selectedContact.lastName }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Contact Image -->
+        <img *ngIf="selectedContact.contactImage && !isEditing"
+          [src]="selectedContact.contactImage"
+          class="img-fluid rounded mx-auto d-block mb-3"
+          alt="Contact Image"
+          style="height: 150px; width: auto; object-fit: contain;"
+        />
+        <div *ngIf="!selectedContact.contactImage && !isEditing" 
+             class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 text-white fw-bold"
+             style="width: 100px; height: 100px; background: #6c757d; font-size: 1.5rem;">
+          {{ getInitials(selectedContact.firstName, selectedContact.lastName) }}
         </div>
-        <div class="modal-body">
-          <img *ngIf="selectedContact.contactImage"
-            [src]="selectedContact.contactImage" 
-            class="img-fluid rounded mx-auto d-block mb-3"
-            alt="Contact Image"
-          />
-          <div *ngIf="!selectedContact.contactImage" 
-               class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 text-white fw-bold"
-               style="width: 100px; height: 100px; background: #6c757d; font-size: 1.5rem;">
-            {{ getInitials(selectedContact.firstName, selectedContact.lastName) }}
-          </div>
+
+        <!-- View Mode -->
+        <div *ngIf="!isEditing">
           <p><strong>Email:</strong> {{ selectedContact.email }}</p>
           <p><strong>Phone:</strong> {{ selectedContact.phoneNumber }}</p>
+          <p><strong>Address:</strong> {{ selectedContact.physicalAddress }}</p>
+          <p><strong>GroupType:</strong> {{ selectedContact.groupType }}</p>
         </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeModal()">Close</button>
+
+        <!-- Edit Mode -->
+        <div *ngIf="isEditing">
+          <input type="text" [(ngModel)]="selectedContact.firstName" class="form-control mb-2" placeholder="First Name">
+          <input type="text" [(ngModel)]="selectedContact.lastName" class="form-control mb-2" placeholder="Last Name">
+          <input type="email" [(ngModel)]="selectedContact.email" class="form-control mb-2" placeholder="Email">
+          <input type="text" [(ngModel)]="selectedContact.phoneNumber" class="form-control mb-2" placeholder="Phone Number">
+          <input type="text" [(ngModel)]="selectedContact.physicalAddress" class="form-control mb-2" placeholder="Address">
+          <input type="text" [(ngModel)]="selectedContact.groupType" class="form-control mb-2" placeholder="Group Type">
         </div>
+      </div>
+
+      <div class="modal-footer">
+        <button *ngIf="isEditing" class="btn btn-success" (click)="saveEdit()">Save</button>
+        <button class="btn btn-secondary" (click)="toggleEditMode()">
+          {{ isEditing ? 'Cancel' : 'Edit' }}
+        </button>
+        <button class="btn btn-danger" (click)="deleteContact(selectedContact)" *ngIf="!isEditing">Delete</button>
       </div>
     </div>
   </div>
+</div>
 </div>
