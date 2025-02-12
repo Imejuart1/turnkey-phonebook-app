@@ -6,13 +6,15 @@ import { Contact } from '../../models/contact.model';
 
 @Component({
   selector: 'app-contact-list',
+  standalone: true,
   imports: [CommonModule, ToggleViewComponent],
   templateUrl: './contact-list.component.html',
-  styleUrls: ['./contact-list.component.css']
+  styleUrls: ['./contact-list.component.scss']
 })
 export class ContactListComponent implements OnInit {
   viewMode: string = 'grid';
   contacts: Contact[] = [];
+  selectedContact: Contact | null = null;
 
   constructor(private contactService: ContactService) {}
 
@@ -31,8 +33,25 @@ export class ContactListComponent implements OnInit {
     );
   }
 
-  toggleView(event: any) {
-    this.viewMode = event.target?.value || 'grid';
+  toggleView(viewMode: string) {
+    this.viewMode = viewMode;
+  }
+
+  openModal(contact: Contact) {
+    this.selectedContact = contact;
+  }
+  editContact(contact: Contact) {
+    this.selectedContact = contact;
+  }
+  deleteContact(contact: Contact) {
+    this.selectedContact = contact;
+  }
+  closeModal() {
+    this.selectedContact = null;
+  }
+
+  getInitials(firstName: string, lastName: string): string {
+    return (firstName ? firstName[0] : '') + (lastName ? lastName[0] : '');
   }
   
 }

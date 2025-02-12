@@ -1,17 +1,96 @@
 <div class="container">
   <app-toggle-view (viewModeChanged)="toggleView($event)"></app-toggle-view>
 
-  <div [ngClass]="viewMode === 'grid' ? 'row' : ''">
-    <div *ngFor="let contact of contacts" [ngClass]="viewMode === 'grid' ? 'col-md-4' : 'col-12'">
-      <div class="card mb-3">
-        <img [src]="contact.contactImage || 'https://via.placeholder.com/150'" class="card-img-top" alt="Contact Image">
-        <div class="card-body">
-          <h5 class="card-title">{{ contact.firstName }} {{ contact.lastName }}</h5>
-          <p class="card-text">{{ contact.email }}</p>
-          <p class="card-text">{{ contact.phoneNumber }}</p>
-          <button class="btn btn-sm btn-outline-primary">View</button>
-          <button class="btn btn-sm btn-outline-warning">Edit</button>
-          <button class="btn btn-sm btn-outline-danger">Delete</button>
+  <div  [ngClass]="viewMode === 'grid' ? 'row d-flex justify-content-between' : 'd-flex flex-column gap-3'">
+    <div *ngFor="let contact of contacts" [ngClass]="viewMode === 'grid' ? 'col-md-4 col-lg-3' : 'card mb-0'" 
+         class="card p-2 shadow-sm border"
+         [style.background]="viewMode === 'grid' ? 'linear-gradient(to bottom, grey, #ffffff)' : 'white'"
+         style="border: 2px solid #ccc; border-radius: 10px; transition: all 0.3s;">
+        
+      <!-- Grid View -->
+      <div *ngIf="viewMode === 'grid'" class="d-flex flex-column align-items-center text-center p-2">
+        <div class="position-relative d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;">
+          <img *ngIf="contact.contactImage" 
+            [src]="contact.contactImage" 
+            class="rounded-circle border"
+            alt="Contact Image"
+            style="width: 100%; height: 100%; object-fit: cover;"
+          />
+          <div *ngIf="!contact.contactImage" 
+               class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
+               style="width: 100%; height: 100%; background: #6c757d; font-size: 1.2rem;">
+            {{ getInitials(contact.firstName, contact.lastName) }}
+          </div>
+        </div>
+        <h6 class="mt-2 text-dark fw-bold">{{ contact.firstName }} {{ contact.lastName }}</h6>
+        <p class="text-dark small">{{ contact.phoneNumber }}</p>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-primary" (click)="openModal(contact)">View</button>
+          <button class="btn btn-sm btn-warning" (click)="editContact(contact)">Edit</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteContact(contact)">Delete</button>
+        </div>
+      </div>
+
+      <!-- List View -->
+      <div *ngIf="viewMode === 'list'" 
+           class="d-flex align-items-center p-2 shadow-sm list-item"
+           style="border-radius: 10px; border: 2px solid #ccc; transition: background 0.3s, box-shadow 0.3s;">
+
+        <div class="position-relative d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+          <img *ngIf="contact.contactImage" 
+               [src]="contact.contactImage" 
+               class="rounded-circle border"
+               alt="Contact Image"
+               style="width: 100%; height: 100%; object-fit: cover;" 
+          />
+          <div *ngIf="!contact.contactImage" 
+               class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
+               style="width: 100%; height: 100%; background: #6c757d; font-size: 1.2rem;">
+            {{ getInitials(contact.firstName, contact.lastName) }}
+          </div>
+        </div>
+
+        <div class="ms-3 flex-grow-1">
+          <h6 class="mb-0 text-dark fw-bold">{{ contact.firstName }} {{ contact.lastName }}</h6>
+          <p class="mb-0 text-dark small">{{ contact.phoneNumber }}</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-primary" (click)="openModal(contact)">View</button>
+          <button class="btn btn-sm btn-warning" (click)="editContact(contact)">Edit</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteContact(contact)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="selectedContact" class="modal fade show d-block" style="background: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ selectedContact.firstName }} {{ selectedContact.lastName }}</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <img *ngIf="selectedContact.contactImage"
+            [src]="selectedContact.contactImage" 
+            class="img-fluid rounded mx-auto d-block mb-3"
+            alt="Contact Image"
+          />
+          <div *ngIf="!selectedContact.contactImage" 
+               class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 text-white fw-bold"
+               style="width: 100px; height: 100px; background: #6c757d; font-size: 1.5rem;">
+            {{ getInitials(selectedContact.firstName, selectedContact.lastName) }}
+          </div>
+          <p><strong>Email:</strong> {{ selectedContact.email }}</p>
+          <p><strong>Phone:</strong> {{ selectedContact.phoneNumber }}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeModal()">Close</button>
         </div>
       </div>
     </div>

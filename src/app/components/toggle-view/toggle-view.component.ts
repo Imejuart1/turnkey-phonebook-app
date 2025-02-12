@@ -1,17 +1,19 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'app-toggle-view',
-  standalone: true,
-  imports: [CommonModule], // Ensure CommonModule is imported
-  templateUrl: './toggle-view.component.html',
-  styleUrls: ['./toggle-view.component.css']
+  template: `
+    <button class="btn btn-primary" (click)="toggle()">
+      {{ viewMode === 'grid' ? 'List View' : 'Grid View' }}
+    </button>
+  `
 })
 export class ToggleViewComponent {
+  @Output() viewModeChanged = new EventEmitter<string>();
   viewMode: string = 'grid';
 
-  toggleView() {
+  toggle() {
     this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+    this.viewModeChanged.emit(this.viewMode);
   }
 }
