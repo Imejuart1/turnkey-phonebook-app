@@ -1,8 +1,9 @@
 <div class="container">
+  <div class="d-flex justify-content-end mb-3" style="width: 100%; margin-bottom: 1rem;">
   <app-toggle-view (viewModeChanged)="toggleView($event)"></app-toggle-view>
-
+   </div>
   <!-- Search & Bulk Delete -->
-  <div class="row mb-3">
+  <div class="row mb-3" style="border-bottom: 3px solid rgb(55, 62, 123); padding-bottom: 1rem; border-radius: 8px">
     <div class="col-md-6">
       <input 
         type="text" 
@@ -152,17 +153,69 @@
 
         <!-- Edit Mode -->
         <div *ngIf="isEditing">
-          <input type="text" [(ngModel)]="selectedContact.firstName" class="form-control mb-2" placeholder="First Name">
-          <input type="text" [(ngModel)]="selectedContact.lastName" class="form-control mb-2" placeholder="Last Name">
-          <input type="email" [(ngModel)]="selectedContact.email" class="form-control mb-2" placeholder="Email">
-          <input type="text" [(ngModel)]="selectedContact.phoneNumber" class="form-control mb-2" placeholder="Phone Number">
-          <input type="text" [(ngModel)]="selectedContact.physicalAddress" class="form-control mb-2" placeholder="Address">
-          <input type="text" [(ngModel)]="selectedContact.groupType" class="form-control mb-2" placeholder="Group Type">
+          <div class="mb-3 text-center">
+            <!-- Clickable Contact Image (opens file input) -->
+            <label for="fileInput" class="d-block">
+              <img *ngIf="selectedContact.contactImage"
+                   [src]="selectedContact.contactImage"
+                   class="img-fluid rounded mb-2"
+                   alt="Contact Image"
+                   style="height: 150px; width: auto; object-fit: contain; cursor: pointer;"
+              />
+            </label>
+          
+            <!-- Default Initials (when no image) -->
+            <div *ngIf="!selectedContact.contactImage"
+                 class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 text-white fw-bold"
+                 style="width: 100px; height: 100px; background: #6c757d; font-size: 1.5rem;">
+              {{ getInitials(selectedContact.firstName, selectedContact.lastName) }}
+            </div>
+          
+            <!-- Hidden File Input (Trigger on Image Click) -->
+            <input type="file" id="fileInput" class="form-control d-none" (change)="onFileSelected($event)">
+          </div>
+          
+          <input type="text" [(ngModel)]="selectedContact.firstName" class="form-control mb-2" 
+       placeholder="First Name" required>
+<div *ngIf="isSubmitted && !selectedContact.firstName" class="text-danger">First name is required.</div>
+
+<input type="text" [(ngModel)]="selectedContact.lastName" class="form-control mb-2" 
+       placeholder="Last Name" required>
+<div *ngIf="isSubmitted && !selectedContact.lastName" class="text-danger">Last name is required.</div>
+
+<input type="email" [(ngModel)]="selectedContact.email" class="form-control mb-2"
+       placeholder="Email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+       (blur)="validateEmail()" [class.is-invalid]="!isEmailValid" required>
+<div *ngIf="!isEmailValid" class="text-danger">Please enter a valid email.</div>
+<div *ngIf="isSubmitted && !selectedContact.email" class="text-danger">Email is required.</div>
+
+<input type="text" [(ngModel)]="selectedContact.phoneNumber" class="form-control mb-2"
+       placeholder="Phone Number" minlength="10"
+       (blur)="validatePhoneNumber()" [class.is-invalid]="!isPhoneValid" required>
+<div *ngIf="!isPhoneValid" class="text-danger">Phone number must be at least 10 digits.</div>
+<div *ngIf="isSubmitted && !selectedContact.phoneNumber" class="text-danger">Phone number is required.</div>
+
+<input type="text" [(ngModel)]="selectedContact.physicalAddress" class="form-control mb-2" 
+       placeholder="Address" required>
+<div *ngIf="isSubmitted && !selectedContact.physicalAddress" class="text-danger">Address is required.</div>
+
+<!-- Group Type: Now a Select Field for Consistency -->
+<select class="form-select mb-2" [(ngModel)]="selectedContact.groupType" required>
+  <option value="" disabled selected>Select Group</option>
+  <option value="Family">Family</option>
+  <option value="Friends">Friends</option>
+  <option value="Work">Work</option>
+</select>
+<div *ngIf="isSubmitted && !selectedContact.groupType" class="text-danger">Please select a group type.</div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button *ngIf="isEditing" class="btn btn-success" (click)="saveEdit()">Save</button>
+        <button *ngIf="isEditing" class="btn btn-success" 
+          (click)="saveEdit()" 
+          [disabled]="isSaving">
+    {{ isSaving ? 'Saving...' : 'Save' }}
+  </button>
         <button class="btn btn-secondary" (click)="toggleEditMode()">
           {{ isEditing ? 'Cancel' : 'Edit' }}
         </button>
