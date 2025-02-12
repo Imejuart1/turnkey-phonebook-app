@@ -6,7 +6,7 @@ export class Contact {
       public phoneNumber: string = '',
       public contactImage?: string,
       public physicalAddress: string = '',
-      public group: string = ''
+      public groupType: string = '',
     ) {}
   }
   

@@ -41,3 +41,29 @@
     }
   }
   
+  .posre{
+    :hover{
+        
+    }
+  }
+
+  select {
+    background: white url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='black' d='M2 0L0 2h4z'/></svg>")
+      no-repeat right 10px center;
+    background-size: 12px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 30px; /* Space for the icon */
+  }
+  i {
+    pointer-events: none; /* Prevent click */
+    transition: transform 0.3s ease;
+  }
+
+  .dropdown-menu {
+    transition: all 0.3s ease-in-out;
+  }
+  ul{
+    cursor:pointer
+  }

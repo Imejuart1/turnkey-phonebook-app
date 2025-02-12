@@ -34,13 +34,17 @@
     </div>
 
     <div class="row mb-3">
-      <div class="col-md-12">
-        <label for="group" class="form-label">Group</label>
-        <select class="form-select" id="group" [(ngModel)]="contact.group" name="group" required>
+      <div class="col-md-6">
+        <label for="groupType" class="form-label">groupType</label>
+        <select class="form-select" id="groupType" [(ngModel)]="contact.groupType" name="groupType" required>
           <option value="Family">Family</option>
           <option value="Friends">Friends</option>
           <option value="Work">Work</option>
         </select>
+      </div>
+      <div class="col-md-6">
+        <label for="phone" class="form-label">Physical Address</label>
+        <input type="tel" class="form-control" id="phone" [(ngModel)]="contact.physicalAddress" name="phone" required>
       </div>
     </div>
 
