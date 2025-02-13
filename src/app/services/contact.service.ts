@@ -17,8 +17,15 @@ export class ContactService {
   }
 
   getContacts(): Observable<Contact[]> {
-    return this.http.get<Contact[]>(this.apiUrl)
-      .pipe(map(contacts => contacts.sort((a, b) => a.firstName.localeCompare(b.firstName))));
+    return this.http.get<Contact[]>(this.apiUrl).pipe(
+      map(contacts => 
+        contacts.sort((a, b) => {
+          const nameA = a.firstName ?? ''; // Ensure it’s never null
+          const nameB = b.firstName ?? '';
+          return nameA.localeCompare(nameB);
+        })
+      )
+    );
   }
 
   deleteContact(contactId: number): Observable<void> {

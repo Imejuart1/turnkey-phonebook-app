@@ -31,6 +31,35 @@ export class ContactListComponent implements OnInit {
   showFavorites: boolean = false;
   constructor(private contactService: ContactService, private cdr: ChangeDetectorRef , private http: HttpClient) {}
 
+
+  loadContacts() {
+  this.contactService.getContacts().subscribe(
+    (data) => {
+      this.contacts = data.map(contact => ({
+        ...contact,
+        firstName: contact.firstName || 'Unknown', // Replace null with default value
+        lastName: contact.lastName || 'Unknown',
+      }));
+
+      this.filteredContacts = [...this.contacts];
+      this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
+
+      console.log("Contacts:", this.filteredContacts);
+
+      let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+      this.contacts.forEach(contact => {
+        if (contact.id) {
+          contact.isFavorite = !!favorites[contact.id]; 
+        }
+      });
+
+      this.cdr.detectChanges();
+    },
+    (error) => console.error('Error fetching contacts:', error)
+  );
+}
+
+
   ngOnInit() {
     this.loadContacts();
   
@@ -89,30 +118,7 @@ export class ContactListComponent implements OnInit {
   validatePhoneNumber() {
     this.isPhoneValid = (this.selectedContact?.phoneNumber?.length ?? 0) >= 10;
   }
-  loadContacts() {
-    this.contactService.getContacts().subscribe(
-      (data) => {
-        this.contacts = data;
-        this.filteredContacts = data;
-        this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
-  
-        // Restore favorites from localStorage
-        let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
-  
-        this.contacts.forEach(contact => {
-          if (contact.id) { // Ensure contact.id is not null/undefined
-            contact.isFavorite = !!favorites[contact.id]; 
-          }
-        });
-  
-        // Detect changes after updating contacts
-        this.cdr.detectChanges();
-      },
-      (error) => console.error('Error fetching contacts:', error)
-    );
-  }
-  
-  
+
 
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
