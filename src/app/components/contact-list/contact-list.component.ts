@@ -55,11 +55,23 @@ export class ContactListComponent implements OnInit {
   }
   isEmailValid: boolean = true;
   isPhoneValid: boolean = true;
-  toggleFavorite(contact: Contact) {
+  toggleFavorite(contact: any) {
     contact.isFavorite = !contact.isFavorite;
-    this.saveContactsToLocalStorage();
-    this.filterContacts(); // Re-filter contacts after toggling favorite
+    
+    // Get existing favorites from local storage
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+  
+    // Update the favorite status
+    if (contact.isFavorite) {
+      favorites[contact.id] = true; // Assuming each contact has a unique ID
+    } else {
+      delete favorites[contact.id];
+    }
+  
+    // Save updated favorites to local storage
+    localStorage.setItem('favorites', JSON.stringify(favorites));
   }
+  
   saveContactsToLocalStorage() {
     console.log("Saving contacts:", this.contacts); // Debugging log
     if (typeof localStorage !== 'undefined') {

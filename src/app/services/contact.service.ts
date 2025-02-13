@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators'; // Import map operator
   providedIn: 'root'
 })
 export class ContactService {
-  private apiUrl = 'http://localhost:8080/api/contacts';
+  private apiUrl = 'https://turnkeyapp-contactbackend.onrender.com/api/contacts';
 
   constructor(private http: HttpClient) {}
 
