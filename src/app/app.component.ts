@@ -6,7 +6,7 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [NavbarComponent, FormsModule, RouterOutlet], // Import all components
+  imports: [NavbarComponent, FormsModule, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -17,7 +17,7 @@ export class AppComponent implements OnInit {
   constructor(private renderer: Renderer2) {}
 
   ngOnInit() {
-    if (typeof localStorage !== 'undefined') {  // ✅ Check if it's available
+    if (typeof localStorage !== 'undefined') {  
       const savedTheme = localStorage.getItem('theme');
       this.isDarkMode = savedTheme === 'dark';
       this.applyTheme();
@@ -27,18 +27,12 @@ export class AppComponent implements OnInit {
   toggleTheme() {
     this.isDarkMode = !this.isDarkMode;
     if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+      localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
     }
     this.applyTheme();
   }
 
   applyTheme() {
-    if (this.isDarkMode) {
-      this.renderer.addClass(document.body, 'bg-dark');
-      this.renderer.addClass(document.body, 'text-light');
-    } else {
-      this.renderer.removeClass(document.body, 'bg-dark');
-      this.renderer.removeClass(document.body, 'text-light');
-    }
+    document.documentElement.setAttribute('data-bs-theme', this.isDarkMode ? 'dark' : 'light');
   }
 }

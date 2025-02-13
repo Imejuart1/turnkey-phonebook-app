@@ -5,6 +5,7 @@ import { ContactService } from '../../services/contact.service';
 import { Contact } from '../../models/contact.model';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-contact-list',
@@ -94,11 +95,24 @@ export class ContactListComponent implements OnInit {
         this.contacts = data;
         this.filteredContacts = data;
         this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
+  
+        // Restore favorites from localStorage
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+  
+        this.contacts.forEach(contact => {
+          if (contact.id) { // Ensure contact.id is not null/undefined
+            contact.isFavorite = !!favorites[contact.id]; 
+          }
+        });
+  
+        // Detect changes after updating contacts
         this.cdr.detectChanges();
       },
       (error) => console.error('Error fetching contacts:', error)
     );
   }
+  
+  
 
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
@@ -260,4 +274,67 @@ export class ContactListComponent implements OnInit {
   getInitials(firstName: string, lastName: string): string {
     return (firstName ? firstName[0] : '') + (lastName ? lastName[0] : '');
   }
+
+  // Add this to your component
+exportContacts() {
+  const csvData = this.convertToCSV(this.contacts);
+  const blob = new Blob([csvData], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'contacts.csv';
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+convertToCSV(contacts: Contact[]): string {
+  const headers = ['First Name,Last Name,Email,Phone Number,Address,Group Type,Image URL'];
+  const rows = contacts.map((contact) =>
+    `${contact.firstName},${contact.lastName},${contact.email},${contact.phoneNumber},${contact.physicalAddress},${contact.groupType},${contact.contactImage || ''}`
+  );
+  return headers.concat(rows).join('\n');
+}
+
+importContacts(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = (e: any) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const contacts: any[] = XLSX.utils.sheet_to_json(sheet);
+    console.log('Parsed contacts:', contacts);
+
+    // Send data to backend
+    contacts.forEach(contact => {
+      this.contactService.saveContact(contact).subscribe(
+        () => console.log('Contact saved'),
+        error => alert('Error saving contact')
+      );
+    });
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+// Download example format
+downloadTemplate() {
+  const sampleData = [
+    ['First Name', 'Last Name', 'Email', 'Phone Number', 'Address', 'Group Type'],
+    ['John', 'Doe', 'john.doe@example.com', '1234567890', '123 Street', 'Friends']
+  ];
+
+  const worksheet = XLSX.utils.aoa_to_sheet(sampleData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts Template');
+
+  XLSX.writeFile(workbook, 'contacts_template.xlsx');
+}
 }

@@ -1,56 +1,71 @@
 <div class="container">
-  <div class="d-flex justify-content-end mb-3" style="width: 100%; margin-bottom: 1rem;">
+  <button (click)="downloadTemplate()">Import Format</button>
+<input type="file" (change)="importContacts($event)" accept=".xlsx, .xls" />
+
+  <div class="d-flex justify-content-end mb-3" style="width: 100%; margin-bottom: 1rem; margin-top: 1rem">
   <app-toggle-view (viewModeChanged)="setViewMode($event)"></app-toggle-view>
+  <!-- Add this to your template -->
+  <div >
+    <button class="btn btn-primary" (click)="exportContacts()">Export Contacts</button>
+  </div>
    </div>
   <!-- Search & Bulk Delete -->
-  <div class="row mb-3" style="border-bottom: 3px solid rgb(55, 62, 123); padding-bottom: 1rem; border-radius: 8px">
-    <div class="col-md-5">
-      <input 
-        type="text" 
-        class="form-control" 
-        placeholder="Search by name, email, or phone number..." 
-        [(ngModel)]="searchQuery"
-        (input)="filterContacts()"
-      />
-    </div>
+<div class="row mb-3 gx-2 gy-2" 
+style="border-bottom: 3px solid rgb(55, 62, 123); padding-bottom: 1rem; border-radius: 8px;">
 
-    <div class="col-md-2 position-relative">
-      <button 
-        class="btn btn-dark  d-flex align-items-center justify-content-between" 
-        type="button" 
-        (click)="toggleDropdown()"
-        [attr.aria-expanded]="isDropdownOpen"
-        style="width:fit-content"
-      >
-        <span style="margin-right: 10px;">{{ selectedgroupType ? selectedgroupType : 'Select Group' }}</span>
-        <i class="bi" [ngClass]="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-      </button>
+<!-- Search Input -->
+<div class="col-12 col-md-5">
+<input 
+ type="text" 
+ class="form-control" 
+ placeholder="Search by name, email, or phone number..." 
+ [(ngModel)]="searchQuery"
+ (input)="filterContacts()"
+/>
+</div>
 
-      <!-- Dropdown Menu -->
-      <ul 
-        *ngIf="isDropdownOpen" 
-        class="dropdown-menu show w-100 position-absolute shadow border"
-        style="top: 100%; left: 0; z-index: 1050; background: white;"
-      >
-        <li (click)="selectGroup('')">
-          <a class="dropdown-item">All Contacts</a>
-        </li>
-        <li *ngFor="let groupType of contactgroupTypes" (click)="selectGroup(groupType)">
-          <a class="dropdown-item">{{ groupType }}</a>
-        </li>
-      </ul>
-    </div>
-    <div class="col-md-2">
-    <button (click)="showFavorites = !showFavorites; filterContacts()" class="btn btn-warning" >
-      {{ showFavorites ? 'Show All' : 'Show Favorites' }}
-    </button>
-    </div>
-    <div class="col-md-2">
-      <button class="btn btn-danger w-100" [disabled]="!selectedContacts.length" (click)="bulkDelete()">
-        {{ selectedContacts.length ? 'Delete ' + selectedContacts.length : 'Bulk Delete' }}
-      </button>
-    </div>
-  </div>
+<!-- Group Selector Dropdown -->
+<div class="col-12 col-md-2 position-relative">
+<button 
+ class="btn btn-dark d-flex align-items-center justify-content-between w-100" 
+ type="button" 
+ (click)="toggleDropdown()"
+ [attr.aria-expanded]="isDropdownOpen"
+>
+ <span>{{ selectedgroupType ? selectedgroupType : 'Select Group' }}</span>
+ <i class="bi" [ngClass]="isDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+</button>
+
+<!-- Dropdown Menu -->
+<ul 
+ *ngIf="isDropdownOpen" 
+ class="dropdown-menu show w-100 position-absolute shadow border"
+ style="top: 100%; left: 0; z-index: 1050; background: white;"
+>
+ <li (click)="selectGroup('')">
+   <a class="dropdown-item">All Contacts</a>
+ </li>
+ <li *ngFor="let groupType of contactgroupTypes" (click)="selectGroup(groupType)">
+   <a class="dropdown-item">{{ groupType }}</a>
+ </li>
+</ul>
+</div>
+
+<!-- Show Favorites Button -->
+<div class="col-6 col-md-2">
+<button (click)="showFavorites = !showFavorites; filterContacts()" class="btn btn-warning w-100">
+ {{ showFavorites ? 'Show All' : 'Show Favorites' }}
+</button>
+</div>
+
+<!-- Bulk Delete Button -->
+<div class="col-6 col-md-2">
+<button class="btn btn-danger w-100" [disabled]="!selectedContacts.length" (click)="bulkDelete()">
+ {{ selectedContacts.length ? 'Delete ' + selectedContacts.length : 'Bulk Delete' }}
+</button>
+</div>
+
+</div>
 
   <div [ngClass]="viewMode === 'grid' ? 'row d-flex justify-content-between' : 'd-flex flex-column gap-3'">
     <div *ngFor="let contact of filteredContacts" 
@@ -80,12 +95,6 @@
    </div>
  
  </div>
- 
- 
-
- <!-- Star Icon for Favorite Toggle -->
-
-
 
       <!-- Grid View -->
       <div *ngIf="viewMode === 'grid'" class="d-flex flex-column align-items-center text-center p-2">
@@ -227,7 +236,8 @@
 <div *ngIf="isSubmitted && !selectedContact.physicalAddress" class="text-danger">Address is required.</div>
 
 <!-- Group Type: Now a Select Field for Consistency -->
-<select class="form-select mb-2" [(ngModel)]="selectedContact.groupType" required>
+<select class="form-select mb-2" [(ngModel)]="selectedContact.groupType" 
+style='margin-bottom:0.5rem, margin-top:0.5rem' required>
   <option value="" disabled selected>Select Group</option>
   <option value="Family">Family</option>
   <option value="Friends">Friends</option>
