@@ -27,20 +27,46 @@ export class ContactListComponent implements OnInit {
   imageFile: File | null = null; 
   isSaving: boolean = false;
   isSubmitted: boolean = false;
+  showFavorites: boolean = false;
   constructor(private contactService: ContactService, private cdr: ChangeDetectorRef , private http: HttpClient) {}
 
   ngOnInit() {
     this.loadContacts();
-    const savedView = localStorage.getItem('contactViewMode');
-    if (savedView) {
-      this.viewMode = savedView;
+  
+    // ✅ Check if localStorage is available before using it
+    if (typeof localStorage !== 'undefined') {
+      const savedContacts = localStorage.getItem('contacts');
+      if (savedContacts) {
+        this.contacts = JSON.parse(savedContacts);
+        this.filteredContacts = [...this.contacts]; 
+      }
+  
+      const savedView = localStorage.getItem('contactViewMode');
+      if (savedView) {
+        this.viewMode = savedView;
+      }
     }
+  
+    this.filterContacts();
   }
+  
   setViewMode(mode: string) {
     this.viewMode = mode;
   }
   isEmailValid: boolean = true;
   isPhoneValid: boolean = true;
+  toggleFavorite(contact: Contact) {
+    contact.isFavorite = !contact.isFavorite;
+    this.saveContactsToLocalStorage();
+    this.filterContacts(); // Re-filter contacts after toggling favorite
+  }
+  saveContactsToLocalStorage() {
+    console.log("Saving contacts:", this.contacts); // Debugging log
+    if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('contacts', JSON.stringify(this.contacts));
+    }
+  }
+  
   
   validateEmail() {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -195,7 +221,8 @@ export class ContactListComponent implements OnInit {
        contact.phoneNumber.toLowerCase().includes(query)||
        contact.physicalAddress.toLowerCase().includes(query)) 
        &&
-      (!this.selectedgroupType || contact.groupType === this.selectedgroupType)
+      (!this.selectedgroupType || contact.groupType === this.selectedgroupType) &&
+      (!this.showFavorites || contact.isFavorite) 
     );
   }
 

@@ -13,19 +13,24 @@ import { CommonModule } from '@angular/common';
 export class ToggleViewComponent implements OnInit {
   @Output() viewModeChanged = new EventEmitter<string>();
   viewMode: string = 'grid'; // Default view
-
   ngOnInit() {
-    // Load the saved view preference
-    const savedView = localStorage.getItem('contactViewMode');
-    if (savedView) {
-      this.viewMode = savedView;
+    if (typeof localStorage !== 'undefined') {  // ✅ Prevents SSR error
+      const savedView = localStorage.getItem('contactViewMode');
+      if (savedView) {
+        this.viewMode = savedView;
+      }
     }
     this.viewModeChanged.emit(this.viewMode);
   }
-
+  
   toggleView() {
     this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
-    localStorage.setItem('contactViewMode', this.viewMode); // Save preference
+    
+    if (typeof localStorage !== 'undefined') {  // ✅ Prevents SSR error
+      localStorage.setItem('contactViewMode', this.viewMode); 
+    }
+    
     this.viewModeChanged.emit(this.viewMode);
   }
+  
 }

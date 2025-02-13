@@ -8,6 +8,7 @@ export class Contact {
       public contactImage?: string,
       public physicalAddress: string = '',
       public groupType: string = '',
+      public isFavorite: boolean = false
     ) {}
   }
   
