@@ -285,16 +285,22 @@ export class ContactListComponent implements OnInit {
     return (firstName ? firstName[0] : '') + (lastName ? lastName[0] : '');
   }
 
-exportContacts() {
-  const csvData = this.convertToCSV(this.contacts);
-  const blob = new Blob([csvData], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'contacts.csv';
-  a.click();
-  window.URL.revokeObjectURL(url);
-}
+  exportContacts() {
+    const worksheet = XLSX.utils.json_to_sheet(this.contacts);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts');
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'contacts.xlsx';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+  
 
 convertToCSV(contacts: Contact[]): string {
   const headers = ['First Name,Last Name,Email,Phone Number,Address,Group Type,Image URL'];
@@ -341,42 +347,66 @@ importContacts(event: Event) {
     console.log('Parsed contacts:', contacts);
 
     const validContacts: Contact[] = contacts
-  .map(contact => {
-    try {
-      const normalizedContact: any = {};
-      Object.keys(contact).forEach(key => {
-        const normalizedKey = key.toLowerCase().replace(/\s+/g, '');
-        normalizedContact[normalizedKey] = contact[key];
-      });
+      .map(contact => {
+        try {
+          const normalizedContact: any = {};
+          Object.keys(contact).forEach(key => {
+            const normalizedKey = key.toLowerCase().replace(/\s+/g, '');
+            normalizedContact[normalizedKey] = contact[key];
+          });
 
-      const cleanedContact: Contact = {
-        id: 0, // Backend assigns ID
-        firstName: normalizedContact.firstname && typeof normalizedContact.firstname === 'string' ? normalizedContact.firstname.trim() : "Unknown",
-        lastName: normalizedContact.lastname && typeof normalizedContact.lastname === 'string' ? normalizedContact.lastname.trim() : "Unknown",
-        email: normalizedContact.email && typeof normalizedContact.email === 'string' ? normalizedContact.email.trim() : "",
-        phoneNumber: normalizedContact.phonenumber && typeof normalizedContact.phonenumber === 'string' ? normalizedContact.phonenumber.trim() : "",
-        physicalAddress: normalizedContact.address && typeof normalizedContact.address === 'string' ? normalizedContact.address.trim() : "",
-        groupType: normalizedContact.grouptype && typeof normalizedContact.grouptype === 'string' ? normalizedContact.grouptype.trim() : "General",
-        contactImage: normalizedContact.imageurl && typeof normalizedContact.imageurl === 'string' ? normalizedContact.imageurl.trim() : "",
-        isFavorite: false // Default value
-      };
+          // Validate phone number
+          const phoneNumber = normalizedContact.phonenumber && typeof normalizedContact.phonenumber === 'string' 
+            ? normalizedContact.phonenumber.trim() 
+            : "";
 
-      return (cleanedContact.phoneNumber || cleanedContact.email) ? cleanedContact : null;
-    } catch (error) {
-      console.error('Error processing contact:', contact, error);
-      return null;
-    }
-  })
-  .filter((contact): contact is Contact => contact !== null);
+            if (!phoneNumber || !/^\d{10,15}$/.test(phoneNumber)) {  
+              alert(`Invalid phone number: ${phoneNumber}. Phone number must be between 10 and 15 digits.`);  
+              return null;  
+            }
+            
+          const cleanedContact: Contact = {
+            id: 0, // Backend assigns ID
+            firstName: normalizedContact.firstname && typeof normalizedContact.firstname === 'string' 
+              ? normalizedContact.firstname.trim() 
+              : "Unknown",
+            lastName: normalizedContact.lastname && typeof normalizedContact.lastname === 'string' 
+              ? normalizedContact.lastname.trim() 
+              : "Unknown",
+            email: normalizedContact.email && typeof normalizedContact.email === 'string' 
+              ? normalizedContact.email.trim() 
+              : "",
+            phoneNumber: phoneNumber, // Use validated phone number
+            physicalAddress: normalizedContact.address && typeof normalizedContact.address === 'string' 
+              ? normalizedContact.address.trim() 
+              : "",
+            groupType: normalizedContact.grouptype && typeof normalizedContact.grouptype === 'string' 
+              ? normalizedContact.grouptype.trim() 
+              : "General",
+            contactImage: normalizedContact.imageurl && typeof normalizedContact.imageurl === 'string' 
+              ? normalizedContact.imageurl.trim() 
+              : "",
+            isFavorite: false // Default value
+          };
+
+          return (cleanedContact.phoneNumber || cleanedContact.email) ? cleanedContact : null;
+        } catch (error) {
+          console.error('Error processing contact:', contact, error);
+          return null;
+        }
+      })
+      .filter((contact): contact is Contact => contact !== null);
+
     if (validContacts.length === 0) {
-      alert('No valid contacts found. Please check your file format.');
+      alert('No valid contacts found. Please check your file format and ensure phone numbers are 10 digits.');
       return;
     }
 
     this.contactService.bulkSaveContacts(validContacts).subscribe(
-      () =>  {
+      () => {
         alert('Contacts imported successfully!');
-        this.loadContacts(); // 🔄 Update UI immediately after import
+        this.loadContacts();
+        input.value = "";
       },
       (error: any) => {
         console.error('Error saving contacts:', error);
@@ -391,7 +421,6 @@ importContacts(event: Event) {
     reader.readAsText(file);
   }
 }
-
 
 // Download example format
 downloadTemplate() {
