@@ -7,9 +7,9 @@
     <div class="text-center mb-3">
       <label for="imageUpload" class="d-inline-block cursor-pointer">
         <img [src]="imagePreview" class="rounded-circle border border-3 border-primary shadow-sm" 
-             height="80" width="80" style="object-fit: contain" accept="image/*">
+             height="80" width="80" style="object-fit: contain" >
       </label>
-      <input type="file" id="imageUpload" (change)="onImageChange($event)" hidden>
+      <input type="file" id="imageUpload" (change)="onImageChange($event)" hidden accept="image/*">
       <p class="text-muted small mt-1">Click to upload image</p>
       <div *ngIf="imageError" class="text-danger small">{{ imageError }}</div>
     </div>
