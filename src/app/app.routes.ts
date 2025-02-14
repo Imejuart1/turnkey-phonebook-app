@@ -5,5 +5,5 @@ import { ContactFormComponent } from './components/contact-form/contact-form.com
 export const routes: Routes = [
   { path: 'contacts', component: ContactListComponent },
   { path: 'add-contact', component: ContactFormComponent },
-  { path: '', redirectTo: '/contacts', pathMatch: 'full' } // Default route
+  { path: '', redirectTo: '/add-contact', pathMatch: 'full' } // Default route
 ];
