@@ -33,31 +33,35 @@ export class ContactListComponent implements OnInit {
 
 
   loadContacts() {
-  this.contactService.getContacts().subscribe(
-    (data) => {
-      this.contacts = data.map(contact => ({
-        ...contact,
-        firstName: contact.firstName || 'Unknown', // Replace null with default value
-        lastName: contact.lastName || 'Unknown',
-      }));
-
-      this.filteredContacts = [...this.contacts];
-      this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
-
-      console.log("Contacts:", this.filteredContacts);
-
-      let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
-      this.contacts.forEach(contact => {
-        if (contact.id) {
-          contact.isFavorite = !!favorites[contact.id]; 
+    this.contactService.getContacts().subscribe(
+      (data) => {
+        this.contacts = data.map(contact => ({
+          ...contact,
+          firstName: contact.firstName || 'Unknown', // Replace null with default value
+          lastName: contact.lastName || 'Unknown',
+        }));
+  
+        this.filteredContacts = [...this.contacts];
+        this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
+  
+        // Check if localStorage is available
+        let favorites: Record<string, boolean> = {};
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('favorites')) {
+          favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
         }
-      });
-
-      this.cdr.detectChanges();
-    },
-    (error) => console.error('Error fetching contacts:', error)
-  );
-}
+  
+        this.contacts.forEach(contact => {
+          if (contact.id) {
+            contact.isFavorite = !!favorites[contact.id]; 
+          }
+        });
+  
+        this.cdr.detectChanges();
+      },
+      (error) => console.error('Error fetching contacts:', error)
+    );
+  }
+  
 
 
   ngOnInit() {
@@ -281,7 +285,6 @@ export class ContactListComponent implements OnInit {
     return (firstName ? firstName[0] : '') + (lastName ? lastName[0] : '');
   }
 
-  // Add this to your component
 exportContacts() {
   const csvData = this.convertToCSV(this.contacts);
   const blob = new Blob([csvData], { type: 'text/csv' });
@@ -307,28 +310,88 @@ importContacts(event: Event) {
 
   const file = input.files[0];
   const reader = new FileReader();
+  const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
   reader.onload = (e: any) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
+    let contacts: any[] = [];
 
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+    if (fileExtension === 'xlsx') {
+      // ** Process XLSX File **
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
 
-    const contacts: any[] = XLSX.utils.sheet_to_json(sheet);
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      contacts = XLSX.utils.sheet_to_json(sheet);
+    } else if (fileExtension === 'csv') {
+      // ** Process CSV File **
+      const csvData = e.target.result as string;
+      const parsedCSV = XLSX.read(csvData, { type: 'string' });
+
+      const sheetName = parsedCSV.SheetNames[0];
+      const sheet = parsedCSV.Sheets[sheetName];
+
+      contacts = XLSX.utils.sheet_to_json(sheet);
+    } else {
+      alert('Invalid file format. Please upload a CSV or XLSX file.');
+      return;
+    }
+
     console.log('Parsed contacts:', contacts);
 
-    // Send data to backend
-    contacts.forEach(contact => {
-      this.contactService.saveContact(contact).subscribe(
-        () => console.log('Contact saved'),
-        error => alert('Error saving contact')
-      );
-    });
+    const validContacts: Contact[] = contacts
+  .map(contact => {
+    try {
+      const normalizedContact: any = {};
+      Object.keys(contact).forEach(key => {
+        const normalizedKey = key.toLowerCase().replace(/\s+/g, '');
+        normalizedContact[normalizedKey] = contact[key];
+      });
+
+      const cleanedContact: Contact = {
+        id: 0, // Backend assigns ID
+        firstName: normalizedContact.firstname && typeof normalizedContact.firstname === 'string' ? normalizedContact.firstname.trim() : "Unknown",
+        lastName: normalizedContact.lastname && typeof normalizedContact.lastname === 'string' ? normalizedContact.lastname.trim() : "Unknown",
+        email: normalizedContact.email && typeof normalizedContact.email === 'string' ? normalizedContact.email.trim() : "",
+        phoneNumber: normalizedContact.phonenumber && typeof normalizedContact.phonenumber === 'string' ? normalizedContact.phonenumber.trim() : "",
+        physicalAddress: normalizedContact.address && typeof normalizedContact.address === 'string' ? normalizedContact.address.trim() : "",
+        groupType: normalizedContact.grouptype && typeof normalizedContact.grouptype === 'string' ? normalizedContact.grouptype.trim() : "General",
+        contactImage: normalizedContact.imageurl && typeof normalizedContact.imageurl === 'string' ? normalizedContact.imageurl.trim() : "",
+        isFavorite: false // Default value
+      };
+
+      return (cleanedContact.phoneNumber || cleanedContact.email) ? cleanedContact : null;
+    } catch (error) {
+      console.error('Error processing contact:', contact, error);
+      return null;
+    }
+  })
+  .filter((contact): contact is Contact => contact !== null);
+    if (validContacts.length === 0) {
+      alert('No valid contacts found. Please check your file format.');
+      return;
+    }
+
+    this.contactService.bulkSaveContacts(validContacts).subscribe(
+      () =>  {
+        alert('Contacts imported successfully!');
+        this.loadContacts(); // 🔄 Update UI immediately after import
+      },
+      (error: any) => {
+        console.error('Error saving contacts:', error);
+        alert('Error saving contacts');
+      }
+    );
   };
 
-  reader.readAsArrayBuffer(file);
+  if (fileExtension === 'xlsx') {
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.readAsText(file);
+  }
 }
+
 
 // Download example format
 downloadTemplate() {

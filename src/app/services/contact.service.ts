@@ -19,13 +19,22 @@ export class ContactService {
   getContacts(): Observable<Contact[]> {
     return this.http.get<Contact[]>(this.apiUrl).pipe(
       map(contacts => 
-        contacts.sort((a, b) => {
-          const nameA = a.firstName ?? ''; // Ensure it’s never null
-          const nameB = b.firstName ?? '';
-          return nameA.localeCompare(nameB);
-        })
+        contacts
+          .map(contact => ({
+            ...contact,
+            firstName: contact.firstName || 'Unknown', // Prevent null
+            lastName: contact.lastName || 'Unknown'
+          }))
+          .sort((a, b) => {
+            const nameA = a.firstName.toLowerCase();
+            const nameB = b.firstName.toLowerCase();
+            return nameA.localeCompare(nameB);
+          })
       )
     );
+  }
+  bulkSaveContacts(contacts: Contact[]): Observable<Contact[]> {
+    return this.http.post<Contact[]>(`${this.apiUrl}/bulk`, contacts);
   }
 
   deleteContact(contactId: number): Observable<void> {

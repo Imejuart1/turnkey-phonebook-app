@@ -198,7 +198,7 @@ style="border-bottom: 3px solid rgb(55, 62, 123); padding-bottom: 1rem; border-r
                    alt="Contact Image"
                    style="height: 150px; width: auto; object-fit: contain; cursor: pointer;"
               />
-            </label>
+            
           
             <!-- Default Initials (when no image) -->
             <div *ngIf="!selectedContact.contactImage"
@@ -206,9 +206,10 @@ style="border-bottom: 3px solid rgb(55, 62, 123); padding-bottom: 1rem; border-r
                  style="width: 100px; height: 100px; background: #6c757d; font-size: 1.5rem;">
               {{ getInitials(selectedContact.firstName, selectedContact.lastName) }}
             </div>
-          
+          </label>
             <!-- Hidden File Input (Trigger on Image Click) -->
-            <input type="file" id="fileInput" class="form-control d-none" (change)="onFileSelected($event)">
+            <input type="file" id="fileInput" class="form-control d-none" (change)="onFileSelected($event)" accept="image/*">
+
           </div>
           
           <input type="text" [(ngModel)]="selectedContact.firstName" class="form-control mb-2" 

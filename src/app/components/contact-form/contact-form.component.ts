@@ -85,7 +85,7 @@ export class ContactFormComponent {
       this.isSaving = false;
     }, error => {
       console.error('Error saving contact', error);
-      alert('Error saving contact');
+      alert("Please fix form errors before saving.");
       this.isSaving = false;
     });
   }
