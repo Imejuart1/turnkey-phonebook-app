@@ -35,31 +35,36 @@ export class ContactListComponent implements OnInit {
   loadContacts() {
     this.contactService.getContacts().subscribe(
       (data) => {
+       /* console.log('Raw API Response:', data);*/
         this.contacts = data.map(contact => ({
           ...contact,
-          firstName: contact.firstName || 'Unknown', // Replace null with default value
+          firstName: contact.firstName || 'Unknown',
           lastName: contact.lastName || 'Unknown',
         }));
-  
+    
         this.filteredContacts = [...this.contacts];
+        /*console.log('Processed Contacts:', this.contacts);*/
+    
         this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
-  
-        // Check if localStorage is available
-        let favorites: Record<string, boolean> = {};
-        if (typeof localStorage !== 'undefined' && localStorage.getItem('favorites')) {
-          favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+    
+        let newfavorites: Record<string, boolean> = {};
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('newfavorites')) {
+          /*console.log('Stored Favorites:', localStorage.getItem('newfavorites'));*/
+          newfavorites = JSON.parse(localStorage.getItem('newfavorites') || '{}');
         }
-  
+    
         this.contacts.forEach(contact => {
           if (contact.id) {
-            contact.isFavorite = !!favorites[contact.id]; 
+            contact.isFavorite = !!newfavorites[contact.id]; 
           }
         });
-  
+    
+       /* console.log('Final Contacts with Favorites:', this.contacts);*/
         this.cdr.detectChanges();
       },
       (error) => console.error('Error fetching contacts:', error)
     );
+    
   }
   
 
@@ -92,18 +97,18 @@ export class ContactListComponent implements OnInit {
   toggleFavorite(contact: any) {
     contact.isFavorite = !contact.isFavorite;
     
-    // Get existing favorites from local storage
-    let favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+    // Get existing newfavorites from local storage
+    let newfavorites = JSON.parse(localStorage.getItem('newfavorites') || '{}');
   
     // Update the favorite status
     if (contact.isFavorite) {
-      favorites[contact.id] = true; // Assuming each contact has a unique ID
+      newfavorites[contact.id] = true; // Assuming each contact has a unique ID
     } else {
-      delete favorites[contact.id];
+      delete newfavorites[contact.id];
     }
   
-    // Save updated favorites to local storage
-    localStorage.setItem('favorites', JSON.stringify(favorites));
+    // Save updated newfavorites to local storage
+    localStorage.setItem('newfavorites', JSON.stringify(newfavorites));
   }
   
   saveContactsToLocalStorage() {
