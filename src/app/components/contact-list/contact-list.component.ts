@@ -31,7 +31,7 @@ export class ContactListComponent implements OnInit {
   showFavorites: boolean = false;
   constructor(private contactService: ContactService, private cdr: ChangeDetectorRef , private http: HttpClient) {}
 
-
+  loading = true; 
   loadContacts() {
     this.contactService.getContacts().subscribe(
       (data) => {
@@ -58,11 +58,14 @@ export class ContactListComponent implements OnInit {
             contact.isFavorite = !!newfavorites[contact.id]; 
           }
         });
-    
+        this.loading = false;
        /* console.log('Final Contacts with Favorites:', this.contacts);*/
         this.cdr.detectChanges();
       },
-      (error) => console.error('Error fetching contacts:', error)
+      (error) => {
+        console.error('Error fetching contacts:', error);
+        this.loading = false; 
+      }
     );
     
   }
