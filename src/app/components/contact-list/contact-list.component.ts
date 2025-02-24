@@ -74,12 +74,9 @@ export class ContactListComponent implements OnInit {
 
   ngOnInit() {
     this.loadContacts();
-  
-    
     if (typeof localStorage !== 'undefined') {
     localStorage.removeItem('contacts');
   };
-  
       const savedView = localStorage.getItem('contactViewMode');
       if (savedView) {
         this.viewMode = savedView;
