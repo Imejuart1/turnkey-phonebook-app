@@ -75,13 +75,10 @@ export class ContactListComponent implements OnInit {
   ngOnInit() {
     this.loadContacts();
   
-    // ✅ Check if localStorage is available before using it
+    
     if (typeof localStorage !== 'undefined') {
-      const savedContacts = localStorage.getItem('contacts');
-      if (savedContacts) {
-        this.contacts = JSON.parse(savedContacts);
-        this.filteredContacts = [...this.contacts]; 
-      }
+    localStorage.removeItem('contacts');
+  };
   
       const savedView = localStorage.getItem('contactViewMode');
       if (savedView) {
