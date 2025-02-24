@@ -35,48 +35,59 @@ export class ContactListComponent implements OnInit {
   loadContacts() {
     this.contactService.getContacts().subscribe(
       (data) => {
-       /* console.log('Raw API Response:', data);*/
         this.contacts = data.map(contact => ({
           ...contact,
           firstName: contact.firstName || 'Unknown',
           lastName: contact.lastName || 'Unknown',
         }));
-    
+  
         this.filteredContacts = [...this.contacts];
-        /*console.log('Processed Contacts:', this.contacts);*/
-    
+  
         this.contactgroupTypes = [...new Set(data.map(c => c.groupType).filter(g => g))];
-    
+  
+        // Load favorites from localStorage
         let newfavorites: Record<string, boolean> = {};
         if (typeof localStorage !== 'undefined' && localStorage.getItem('newfavorites')) {
-          /*console.log('Stored Favorites:', localStorage.getItem('newfavorites'));*/
           newfavorites = JSON.parse(localStorage.getItem('newfavorites') || '{}');
         }
-    
+  
+        // Apply favorites to the contacts
         this.contacts.forEach(contact => {
           if (contact.id) {
-            contact.isFavorite = !!newfavorites[contact.id]; 
+            contact.isFavorite = !!newfavorites[contact.id];
           }
         });
+  
         this.loading = false;
-       /* console.log('Final Contacts with Favorites:', this.contacts);*/
         this.cdr.detectChanges();
       },
       (error) => {
         console.error('Error fetching contacts:', error);
-        this.loading = false; 
+        this.loading = false;
       }
     );
-    
   }
-  
 
 
   ngOnInit() {
     this.loadContacts();
+  
+
     if (typeof localStorage !== 'undefined') {
-    localStorage.removeItem('contacts');
-  };
+
+      const savedFavorites = localStorage.getItem('newfavorites');
+      if (savedFavorites) {
+        const newfavorites: Record<string, boolean> = JSON.parse(savedFavorites);
+        
+       
+        this.contacts.forEach(contact => {
+          if (contact.id) {
+            contact.isFavorite = !!newfavorites[contact.id];
+          }
+        });
+      }
+  
+    
       const savedView = localStorage.getItem('contactViewMode');
       if (savedView) {
         this.viewMode = savedView;
@@ -85,7 +96,6 @@ export class ContactListComponent implements OnInit {
   
     this.filterContacts();
   }
-  
   setViewMode(mode: string) {
     this.viewMode = mode;
   }
